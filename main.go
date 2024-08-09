@@ -45,7 +45,7 @@ var (
 func main() {
 	positionKey, err := calcPositionKey(ownerPositionAddress, tickLower, tickUpper)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("calc position key:", err)
 	}
 	contract, _ := abi.JSON(strings.NewReader(abiUniV3Pool))
 	calldata, _ := contract.Pack(positionsMethod, positionKey)
@@ -55,15 +55,15 @@ func main() {
 		log.Fatal("conenct to node:", err)
 	}
 
-	res, err := client.CallContract(context.Background(), ethereum.CallMsg{To: &poolAddress, Data: calldata}, nil)
+	response, err := client.CallContract(context.Background(), ethereum.CallMsg{To: &poolAddress, Data: calldata}, nil)
 	if err != nil {
 		log.Fatal("call contract:", err)
 	}
 
 	var position Position
 
-	if err := contract.UnpackIntoInterface(&position, positionsMethod, res); err != nil {
-		log.Fatal(err)
+	if err := contract.UnpackIntoInterface(&position, positionsMethod, response); err != nil {
+		log.Fatal("parse result contract: ", err, "response: ", string(response))
 	}
 
 	fmt.Printf("%+v", position)
